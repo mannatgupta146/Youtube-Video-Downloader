@@ -1,0 +1,52 @@
+User URL paste
+   ↓
+Frontend API call
+   ↓
+Backend (controller → service)
+   ↓
+YouTube data
+   ↓
+Frontend show UI
+   ↓
+Download button click                                                                                           
+
+
+
+youtube-downloader
+
+├── backend
+│   ├── controllers
+│   │    └── youtubeController.js
+│   │
+│   ├── routes
+│   │    └── youtubeRoutes.js
+│   │
+│   ├── services
+│   │    └── youtubeService.js
+│   │
+│   ├── utils
+│   │    └── validateUrl.js
+│   │
+│   ├── app.js
+│   └── server.js
+│
+├── frontend
+│   ├── src
+│   │   ├── components
+│   │   │    ├── InputBox.jsx
+│   │   │    ├── VideoCard.jsx
+│   │   │    ├── DownloadButton.jsx
+│   │   │    └── Loader.jsx
+│   │   │
+│   │   ├── pages
+│   │   │    └── Home.jsx
+│   │   │
+│   │   ├── services
+│   │   │    └── api.js
+│   │   │
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   │
+│   └── package.json
+│
+└── README.md
