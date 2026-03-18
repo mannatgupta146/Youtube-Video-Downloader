@@ -44,7 +44,7 @@ function Downloader() {
 
     try {
       // Apne backend endpoint ko hit karna
-      const response = await axios.get(`http://localhost:3000/api/youtube/download`, {
+      const response = await axios.get(`https://youtube-video-downloader-zptp.onrender.com/api/youtube/download`, {
         params: { url: url }
       });
 
