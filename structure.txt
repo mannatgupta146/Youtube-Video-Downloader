@@ -8,45 +8,44 @@ YouTube data
    ↓
 Frontend show UI
    ↓
-Download button click                                                                                           
-
-
+Download button click
 
 youtube-downloader
-
-├── backend
-│   ├── controllers
-│   │    └── youtubeController.js
-│   │
-│   ├── routes
-│   │    └── youtubeRoutes.js
-│   │
-│   ├── services
-│   │    └── youtubeService.js
-│   │
-│   ├── utils
-│   │    └── validateUrl.js
-│   │
-│   ├── app.js
-│   └── server.js
 │
-├── frontend
+├── Backend
+│   ├── src
+│   │   ├── controllers
+│   │   │    └── youtubeController.js
+│   │   ├── routes
+│   │   │    └── youtubeRoutes.js
+│   │   ├── services
+│   │   │    └── youtubeService.js
+│   │   └── app.js
+│   │
+│   ├── .env
+│   ├── api_response.json
+│   ├── package.json
+│   ├── server.js
+│   └── test_api.js
+│
+├── Frontend
+│   ├── public
+│   │   ├── favicon.svg
+│   │   └── icons.svg
+│   │
 │   ├── src
 │   │   ├── components
-│   │   │    ├── InputBox.jsx
-│   │   │    ├── VideoCard.jsx
-│   │   │    ├── DownloadButton.jsx
-│   │   │    └── Loader.jsx
-│   │   │
-│   │   ├── pages
-│   │   │    └── Home.jsx
-│   │   │
-│   │   ├── services
-│   │   │    └── api.js
+│   │   │    └── Downloader.jsx
 │   │   │
 │   │   ├── App.jsx
+│   │   ├── index.css
 │   │   └── main.jsx
 │   │
-│   └── package.json
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── README.md
+│   └── vite.config.js
 │
-└── README.md
+├── .gitignore
+└── structure.txt
