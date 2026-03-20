@@ -175,10 +175,18 @@ function Downloader() {
               </button>
             </div>
           ) : (
-            <>
-              <img src={data.fullResponse?.thumbnail || getThumbnail(url)} alt="thumbnail" className="thumb-img" />
-              <div className="info-content">
-                <p className="v-title" title={data.title}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+              <button 
+                onClick={() => { setData(null); setUrl(''); }}
+                style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ⬅ Back to Main Page
+              </button>
+              
+              <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-start', flexWrap: 'wrap', width: '100%' }}>
+                <img src={data.fullResponse?.thumbnail || getThumbnail(url)} alt="thumbnail" className="thumb-img" />
+                <div className="info-content" style={{ flex: 1, minWidth: '250px' }}>
+                  <p className="v-title" title={data.title}>
                   {data.title || "Your Video is Ready"}
                 </p>
                 
@@ -251,23 +259,9 @@ function Downloader() {
                 </button>
               )}
             </div>
-            
-            <button 
-              onClick={() => { setData(null); setUrl(''); }}
-              style={{
-                width: '100%', marginTop: '20px', padding: '10px',
-                background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                color: '#cbd5e1', borderRadius: '12px', cursor: 'pointer',
-                fontWeight: 'bold', fontSize: '0.95rem'
-              }}
-              onMouseOver={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; e.target.style.color = '#fff'; }}
-              onMouseOut={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.05)'; e.target.style.color = '#cbd5e1'; }}
-            >
-              ⬅ Clear & Download Another
-            </button>
-
           </div>
-            </>
+            </div>
+            </div>
           )}
         </div>
       )}
