@@ -78,7 +78,7 @@ function Downloader() {
         
         setHistory(prev => {
           const filtered = prev.filter(item => item.url !== targetUrl);
-          const newHistory = [newItem, ...filtered].slice(0, 5); // Kepp only last 5 videos
+          const newHistory = [newItem, ...filtered].slice(0, 50); // Keep up to 50 videos
           localStorage.setItem("yt_history", JSON.stringify(newHistory));
           return newHistory;
         });
@@ -270,7 +270,7 @@ function Downloader() {
           <h3 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
             🕒 Recent Downloads
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '280px', overflowY: 'auto', paddingRight: '5px' }}>
             {history.map((item, index) => (
               <div 
                 key={index}
