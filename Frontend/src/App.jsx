@@ -7,24 +7,29 @@ function App() {
     <div className="landing-page">
       <nav className="navbar">
         <div className="nav-logo">YT<span>MP4</span></div>
-        <div style={{ color: '#52525b', fontSize: '0.85rem', fontWeight: '500' }}>v2.0</div>
+        <div className="nav-badge">v2.0 Free</div>
       </nav>
 
       <main>
         <div className="hero-section">
-          <h1 className="hero-title">Download YouTube in HQ & MP3 Instantly</h1>
-          <p className="hero-subtitle">The fastest, completely free, and premium downloader with zero limits. Just paste your link below and grab your 1080p videos or 320kbps MP3s.</p>
+          <div className="hero-eyebrow">⚡ No limits · No signup · Always free</div>
+          <h1 className="hero-title">
+            Download YouTube<br />
+            <span className="gradient-text">Videos &amp; Audio</span>
+          </h1>
+          <p className="hero-subtitle">
+            Paste any YouTube link to instantly get 1080p downloads, 
+            MP3 audio, and HD thumbnails — completely free.
+          </p>
         </div>
 
         <div className="downloader-wrapper">
           <Downloader />
         </div>
-
-
       </main>
 
       <footer className="footer">
-        <p>© 2026 YTMP4 Premium. Designed for aesthetic and functionality.</p>
+        <p>© 2026 YTMP4 · Built for speed &amp; quality</p>
       </footer>
     </div>
   );
