@@ -18,21 +18,24 @@ async function getVideoInfo(videoId) {
     };
 
     let info;
-    try {
-      // 1. Try with Chrome cookies (most common on Windows)
-      info = await youtubedl(videoUrl, { ...baseOptions, cookiesFromBrowser: "chrome" });
-    } catch (err1) {
-      if (err1.message.includes("is not signed in") || err1.message.includes("could not find browser")) {
-        try {
-          // 2. Try with Edge cookies (Windows default)
-          info = await youtubedl(videoUrl, { ...baseOptions, cookiesFromBrowser: "edge" });
-        } catch (err2) {
-          // 3. Fallback to no cookies if browser auth fails or browser not found
-          info = await youtubedl(videoUrl, baseOptions);
-        }
-      } else {
-        throw err1;
+    const browsers = ["chrome", "edge", "brave", "opera"];
+    let success = false;
+
+    // Try multiple browsers for cookies, fallback gracefully if they fail (e.g. locked database)
+    for (const browser of browsers) {
+      try {
+        info = await youtubedl(videoUrl, { ...baseOptions, cookiesFromBrowser: browser });
+        success = true;
+        break;
+      } catch (err) {
+        // If it's a "database lock" or "not found" error, just try the next browser
+        continue;
       }
+    }
+
+    if (!success) {
+      // Final fallback to no cookies if all browser attempts fail
+      info = await youtubedl(videoUrl, baseOptions);
     }
 
     const formats = info.formats || [];

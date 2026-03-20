@@ -19,7 +19,7 @@ function App() {
           </h1>
           <p className="hero-subtitle">
             Paste any YouTube link to instantly get 1080p downloads, 
-            MP3 audio, and HD thumbnails — completely free.
+            MP3 audio, and HD thumbnails, completely free.
           </p>
         </div>
 
