@@ -5,6 +5,7 @@ function Downloader() {
   const [url, setUrl] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [mediaView, setMediaView] = useState(null); // 'audio' or 'thumbnail'
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem("yt_history");
     return saved ? JSON.parse(saved) : [];
@@ -48,6 +49,7 @@ function Downloader() {
   const fetchDownload = async (targetUrl) => {
     setLoading(true);
     setData(null);
+    setMediaView(null); // Reset media viewer on new fetch
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -119,27 +121,64 @@ function Downloader() {
       {/* Result Display Area */}
       {data && (
         <div className="result-box">
-          <img src={data.fullResponse?.thumbnail || getThumbnail(url)} alt="thumbnail" className="thumb-img" />
-          <div className="info-content">
-            <p className="v-title" title={data.title}>
-              {data.title || "Your Video is Ready"}
-            </p>
-            
-            {/* Show extra metadata if available */}
-            {data.fullResponse?.channel && (
-               <div style={{ fontSize: '0.9rem', color: '#b2bec3', marginTop: '5px', marginBottom: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                 <span style={{ fontWeight: 'bold', color: '#fff' }}>👤 {data.fullResponse.channel}</span>
-                 {data.fullResponse.views && (
-                   <span>👁️ {parseInt(data.fullResponse.views).toLocaleString()} views</span>
-                 )}
-                 {data.fullResponse.likes && (
-                   <span>👍 {parseInt(data.fullResponse.likes).toLocaleString()} likes</span>
-                 )}
-                 {data.fullResponse.date && (
-                   <span>📅 {data.fullResponse.date}</span>
-                 )}
-               </div>
-            )}
+          {mediaView === 'audio' ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <button 
+                onClick={() => setMediaView(null)}
+                style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ⬅ Back to Main Page
+              </button>
+              <h3 style={{ fontSize: '1.2rem', margin: 0 }}>Listening to Audio 🎵</h3>
+              <audio controls src={data.fullResponse?.audioLink} style={{ width: '100%', outline: 'none', borderRadius: '12px' }} autoPlay />
+              <button 
+                  onClick={() => triggerDownload(data.fullResponse.audioLink, (data.title || "video") + " Audio", "audio")} 
+                  className="dl-link"
+                  style={{ border: 'none', cursor: 'pointer', backgroundColor: '#00b894', color: 'white', padding: '12px', borderRadius: '10px', fontWeight: 'bold', width: '100%', textAlign: 'center', justifyContent: 'center' }}
+              >
+                  Download Audio 📥
+              </button>
+            </div>
+          ) : mediaView === 'thumbnail' ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <button 
+                onClick={() => setMediaView(null)}
+                style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ⬅ Back to Main Page
+              </button>
+              <img src={data.fullResponse?.thumbnail} alt="HD Thumbnail" style={{ width: '100%', borderRadius: '12px', maxHeight: '350px', objectFit: 'contain', backgroundColor: 'rgba(0,0,0,0.4)', boxShadow: '0 10px 20px rgba(0,0,0,0.3)' }} />
+              <button 
+                  onClick={() => triggerDownload(data.fullResponse.thumbnail, (data.title || "video") + " Thumbnail", "image")} 
+                  className="dl-link"
+                  style={{ border: 'none', cursor: 'pointer', backgroundColor: '#6c5ce7', color: 'white', padding: '12px', borderRadius: '10px', fontWeight: 'bold', width: '100%', textAlign: 'center', justifyContent: 'center' }}
+              >
+                  Download HQ Image 📥
+              </button>
+            </div>
+          ) : (
+            <>
+              <img src={data.fullResponse?.thumbnail || getThumbnail(url)} alt="thumbnail" className="thumb-img" />
+              <div className="info-content">
+                <p className="v-title" title={data.title}>
+                  {data.title || "Your Video is Ready"}
+                </p>
+                
+                {/* Show extra metadata if available */}
+                {data.fullResponse?.channel && (
+                   <div style={{ fontSize: '0.9rem', color: '#b2bec3', marginTop: '5px', marginBottom: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                     <span style={{ fontWeight: 'bold', color: '#fff' }}>👤 {data.fullResponse.channel}</span>
+                     {data.fullResponse.views && (
+                       <span>👁️ {parseInt(data.fullResponse.views).toLocaleString()} views</span>
+                     )}
+                     {data.fullResponse.likes && (
+                       <span>👍 {parseInt(data.fullResponse.likes).toLocaleString()} likes</span>
+                     )}
+                     {data.fullResponse.date && (
+                       <span>📅 {data.fullResponse.date}</span>
+                     )}
+                   </div>
+                )}
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               
@@ -180,21 +219,21 @@ function Downloader() {
 
               {data.fullResponse?.audioLink && (
                 <button 
-                  onClick={() => triggerDownload(data.fullResponse.audioLink, data.title + " Audio", "audio")} 
+                  onClick={() => setMediaView('audio')} 
                   className="dl-link"
                   style={{ border: 'none', cursor: 'pointer', flex: 1, backgroundColor: '#00b894', color: 'white', minWidth: '120px' }}
                 >
-                  Download Audio 🎵 {data.fullResponse?.audioSize ? `(${data.fullResponse.audioSize})` : ''}
+                  Listen Audio 🎵 {data.fullResponse?.audioSize ? `(${data.fullResponse.audioSize})` : ''}
                 </button>
               )}
               
               {data.fullResponse?.thumbnail && (
                 <button 
-                  onClick={() => triggerDownload(data.fullResponse.thumbnail, (data.title || "video") + " Thumbnail", "image")} 
+                  onClick={() => setMediaView('thumbnail')} 
                   className="dl-link"
                   style={{ border: 'none', cursor: 'pointer', flex: 1, backgroundColor: '#6c5ce7', color: 'white', minWidth: '120px' }}
                 >
-                  HD Thumbnail 🖼️
+                  View HD Thumbnail 🖼️
                 </button>
               )}
             </div>
@@ -210,10 +249,12 @@ function Downloader() {
               onMouseOver={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; e.target.style.color = '#fff'; }}
               onMouseOut={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.05)'; e.target.style.color = '#cbd5e1'; }}
             >
-              ⬅ Go Back & Download Another
+              ⬅ Clear & Download Another
             </button>
 
           </div>
+            </>
+          )}
         </div>
       )}
 
