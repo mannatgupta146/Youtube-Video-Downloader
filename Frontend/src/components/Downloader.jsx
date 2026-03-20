@@ -5,6 +5,10 @@ function Downloader() {
   const [url, setUrl] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem("yt_history");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const getThumbnail = (videoUrl) => {
   if (!videoUrl) return "https://via.placeholder.com/120x80?text=No+URL";
@@ -23,12 +27,16 @@ function Downloader() {
   }
 };
 
-  // 2. File ko .mp4 extension ke saath force download karne ka function
-  const triggerDownload = (fileUrl, title) => {
+  // 2. File ko format ke hisaab se download karne ka function
+  const triggerDownload = (fileUrl, title, type = "video") => {
     const link = document.createElement("a");
     link.href = fileUrl;
-    // Browser ko batana ki file ka naam kya rakhen aur extension .mp4 ho
-    const fileName = title ? `${title.replace(/[^a-zA-Z0-9 ]/g, "")}.mp4` : "video_download.mp4";
+    // Extension decide karna
+    let ext = ".mp4";
+    if (type === "image") ext = ".jpg";
+    else if (type === "audio") ext = ".m4a";
+
+    const fileName = title ? `${title.replace(/[^a-zA-Z0-9 ]/g, "")}${ext}` : `youtube_download${ext}`;
     link.setAttribute("download", fileName);
     link.setAttribute("target", "_blank");
     document.body.appendChild(link);
@@ -37,19 +45,43 @@ function Downloader() {
   };
 
   // 3. Backend API call logic
-  const handleDownload = async (e) => {
-    e.preventDefault();
+  const fetchDownload = async (targetUrl) => {
     setLoading(true);
     setData(null);
 
     try {
-      // Apne backend endpoint ko hit karna
-      const response = await axios.get(`https://youtube-video-downloader-zptp.onrender.com/api/youtube/download`, {
-        params: { url: url }
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      
+      const response = await axios.get(`${API_URL}/api/youtube/download`, {
+        params: { url: targetUrl }
       });
 
       if (response.data.success) {
         setData(response.data);
+        
+        // Reset quality url on new fetch intentionally through DOM dataset trick
+        setTimeout(() => {
+          const btn = document.getElementById('dl-mp4-btn');
+          if (btn && response.data.fullResponse?.videoLinks?.length > 0) {
+            btn.dataset.url = response.data.fullResponse.videoLinks[0].url;
+          }
+        }, 50);
+
+        // Save to history
+        const newItem = {
+          url: targetUrl,
+          title: response.data.title,
+          thumbnail: response.data.fullResponse?.thumbnail || getThumbnail(targetUrl),
+          channel: response.data.fullResponse?.channel || "Unknown",
+        };
+        
+        setHistory(prev => {
+          const filtered = prev.filter(item => item.url !== targetUrl);
+          const newHistory = [newItem, ...filtered].slice(0, 5); // Kepp only last 5 videos
+          localStorage.setItem("yt_history", JSON.stringify(newHistory));
+          return newHistory;
+        });
+
       } else {
         alert("Backend Error: " + response.data.error);
       }
@@ -61,11 +93,13 @@ function Downloader() {
     }
   };
 
+  const handleDownload = (e) => {
+    e.preventDefault();
+    fetchDownload(url);
+  };
+
   return (
     <div className="glass-container">
-      <h1 className="logo-text">YT<span>MP4</span></h1>
-      <p className="sub-text">Premium YouTube Video Downloader</p>
-      
       <form onSubmit={handleDownload}>
         <div className="input-wrapper">
           <input
@@ -85,19 +119,119 @@ function Downloader() {
       {/* Result Display Area */}
       {data && (
         <div className="result-box">
-          <img src={getThumbnail(url)} alt="thumbnail" className="thumb-img" />
+          <img src={data.fullResponse?.thumbnail || getThumbnail(url)} alt="thumbnail" className="thumb-img" />
           <div className="info-content">
             <p className="v-title" title={data.title}>
               {data.title || "Your Video is Ready"}
             </p>
-            {/* Direct <a> tag ke bajaye hum custom function use kar rahe hain */}
-            <button 
-              onClick={() => triggerDownload(data.download, data.title)} 
-              className="dl-link"
-              style={{ border: 'none', cursor: 'pointer' }}
-            >
-              Download MP4 📥
-            </button>
+            
+            {/* Show extra metadata if available */}
+            {data.fullResponse?.channel && (
+               <div style={{ fontSize: '0.9rem', color: '#b2bec3', marginTop: '5px', marginBottom: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                 <span style={{ fontWeight: 'bold', color: '#fff' }}>👤 {data.fullResponse.channel}</span>
+                 {data.fullResponse.views && (
+                   <span>👁️ {parseInt(data.fullResponse.views).toLocaleString()} views</span>
+                 )}
+                 {data.fullResponse.likes && (
+                   <span>👍 {parseInt(data.fullResponse.likes).toLocaleString()} likes</span>
+                 )}
+                 {data.fullResponse.date && (
+                   <span>📅 {data.fullResponse.date}</span>
+                 )}
+               </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+              
+              {data.fullResponse?.videoLinks && data.fullResponse.videoLinks.length > 0 ? (
+                <div style={{ display: 'flex', flex: 1, gap: '5px', minWidth: '120px' }}>
+                  <select
+                    onChange={(e) => {
+                       const btn = document.getElementById('dl-mp4-btn');
+                       if (btn) btn.dataset.url = e.target.value;
+                    }}
+                    style={{ padding: '8px', borderRadius: '5px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', flex: 0.4, outline: 'none', cursor: 'pointer' }}
+                  >
+                    {data.fullResponse.videoLinks.map((vid, idx) => (
+                      <option key={idx} value={vid.url} style={{ color: 'black' }}>
+                        {vid.quality || 'Unknown'} {vid.size ? `(${vid.size})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <button 
+                    id="dl-mp4-btn"
+                    data-url={data.fullResponse.videoLinks[0].url}
+                    onClick={(e) => triggerDownload(e.currentTarget.dataset.url, data.title, "video")} 
+                    className="dl-link"
+                    style={{ border: 'none', cursor: 'pointer', flex: 0.6 }}
+                  >
+                    Download MP4 📥
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => triggerDownload(data.download, data.title, "video")} 
+                  className="dl-link"
+                  style={{ border: 'none', cursor: 'pointer', flex: 1, minWidth: '120px' }}
+                >
+                  Download MP4 📥
+                </button>
+              )}
+
+              {data.fullResponse?.audioLink && (
+                <button 
+                  onClick={() => triggerDownload(data.fullResponse.audioLink, data.title + " Audio", "audio")} 
+                  className="dl-link"
+                  style={{ border: 'none', cursor: 'pointer', flex: 1, backgroundColor: '#00b894', color: 'white', minWidth: '120px' }}
+                >
+                  Download Audio 🎵 {data.fullResponse?.audioSize ? `(${data.fullResponse.audioSize})` : ''}
+                </button>
+              )}
+              
+              {data.fullResponse?.thumbnail && (
+                <button 
+                  onClick={() => triggerDownload(data.fullResponse.thumbnail, (data.title || "video") + " Thumbnail", "image")} 
+                  className="dl-link"
+                  style={{ border: 'none', cursor: 'pointer', flex: 1, backgroundColor: '#6c5ce7', color: 'white', minWidth: '120px' }}
+                >
+                  HD Thumbnail 🖼️
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* History Section */}
+      {history.length > 0 && (
+        <div className="history-section" style={{ marginTop: '30px', textAlign: 'left' }}>
+          <h3 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
+            🕒 Recent Downloads
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {history.map((item, index) => (
+              <div 
+                key={index}
+                onClick={() => {
+                  setUrl(item.url);
+                  fetchDownload(item.url);
+                }}
+                title="Click to download again"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', 
+                  backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '10px',
+                  cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)'
+                }}
+              >
+                <img src={item.thumbnail} alt="thumb" style={{ width: '80px', height: '45px', objectFit: 'cover', borderRadius: '5px' }} />
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <p style={{ color: '#fff', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+                    {item.title}
+                  </p>
+                  <p style={{ color: '#b2bec3', fontSize: '0.75rem', margin: '3px 0 0 0' }}>{item.channel}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
