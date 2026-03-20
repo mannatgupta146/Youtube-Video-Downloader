@@ -198,6 +198,21 @@ function Downloader() {
                 </button>
               )}
             </div>
+            
+            <button 
+              onClick={() => { setData(null); setUrl(''); }}
+              style={{
+                width: '100%', marginTop: '20px', padding: '10px',
+                background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                color: '#cbd5e1', borderRadius: '12px', cursor: 'pointer',
+                fontWeight: 'bold', fontSize: '0.95rem'
+              }}
+              onMouseOver={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; e.target.style.color = '#fff'; }}
+              onMouseOut={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.05)'; e.target.style.color = '#cbd5e1'; }}
+            >
+              ⬅ Go Back & Download Another
+            </button>
+
           </div>
         </div>
       )}
