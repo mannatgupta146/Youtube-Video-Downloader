@@ -5,7 +5,8 @@ function Downloader() {
   const [url, setUrl] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [mediaView, setMediaView] = useState(null); // 'audio' or 'thumbnail'
+  const [mediaView, setMediaView] = useState(null); // 'audio' or 'thumbnail' or 'video'
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState('');
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem("yt_history");
     return saved ? JSON.parse(saved) : [];
@@ -61,13 +62,12 @@ function Downloader() {
       if (response.data.success) {
         setData(response.data);
         
-        // Reset quality url on new fetch intentionally through DOM dataset trick
-        setTimeout(() => {
-          const btn = document.getElementById('dl-mp4-btn');
-          if (btn && response.data.fullResponse?.videoLinks?.length > 0) {
-            btn.dataset.url = response.data.fullResponse.videoLinks[0].url;
-          }
-        }, 50);
+        // Set default selected video to highest quality 
+        if (response.data.fullResponse?.videoLinks?.length > 0) {
+          setSelectedVideoUrl(response.data.fullResponse.videoLinks[0].url);
+        } else {
+          setSelectedVideoUrl(response.data.download || '');
+        }
 
         // Save to history
         const newItem = {
@@ -121,7 +121,25 @@ function Downloader() {
       {/* Result Display Area */}
       {data && (
         <div className="result-box">
-          {mediaView === 'audio' ? (
+          {mediaView === 'video' ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <button 
+                onClick={() => setMediaView(null)}
+                style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ⬅ Back to Main Page
+              </button>
+              <h3 style={{ fontSize: '1.2rem', margin: 0 }}>Watching Video 🎥</h3>
+              <video controls src={selectedVideoUrl} style={{ width: '100%', outline: 'none', borderRadius: '12px', maxHeight: '350px', background: 'black' }} autoPlay />
+              <button 
+                  onClick={() => triggerDownload(selectedVideoUrl, (data.title || "video") + " HD", "video")} 
+                  className="dl-link"
+                  style={{ border: 'none', cursor: 'pointer', backgroundColor: '#e17055', color: 'white', padding: '12px', borderRadius: '10px', fontWeight: 'bold', width: '100%', textAlign: 'center', justifyContent: 'center' }}
+              >
+                  Download Video to Device 📥
+              </button>
+            </div>
+          ) : mediaView === 'audio' ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <button 
                 onClick={() => setMediaView(null)}
@@ -185,10 +203,8 @@ function Downloader() {
               {data.fullResponse?.videoLinks && data.fullResponse.videoLinks.length > 0 ? (
                 <div style={{ display: 'flex', flex: 1, gap: '5px', minWidth: '120px' }}>
                   <select
-                    onChange={(e) => {
-                       const btn = document.getElementById('dl-mp4-btn');
-                       if (btn) btn.dataset.url = e.target.value;
-                    }}
+                    value={selectedVideoUrl}
+                    onChange={(e) => setSelectedVideoUrl(e.target.value)}
                     style={{ padding: '8px', borderRadius: '5px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', flex: 0.4, outline: 'none', cursor: 'pointer' }}
                   >
                     {data.fullResponse.videoLinks.map((vid, idx) => (
@@ -198,22 +214,20 @@ function Downloader() {
                     ))}
                   </select>
                   <button 
-                    id="dl-mp4-btn"
-                    data-url={data.fullResponse.videoLinks[0].url}
-                    onClick={(e) => triggerDownload(e.currentTarget.dataset.url, data.title, "video")} 
+                    onClick={() => setMediaView('video')} 
                     className="dl-link"
-                    style={{ border: 'none', cursor: 'pointer', flex: 0.6 }}
+                    style={{ border: 'none', cursor: 'pointer', flex: 0.6, textAlign: 'center', justifyContent: 'center' }}
                   >
-                    Download MP4 📥
+                    Watch & Download MP4 🎥
                   </button>
                 </div>
               ) : (
                 <button 
-                  onClick={() => triggerDownload(data.download, data.title, "video")} 
+                  onClick={() => setMediaView('video')} 
                   className="dl-link"
-                  style={{ border: 'none', cursor: 'pointer', flex: 1, minWidth: '120px' }}
+                  style={{ border: 'none', cursor: 'pointer', flex: 1, minWidth: '120px', textAlign: 'center', justifyContent: 'center' }}
                 >
-                  Download MP4 📥
+                  Watch & Download MP4 🎥
                 </button>
               )}
 
