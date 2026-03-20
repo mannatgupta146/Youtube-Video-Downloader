@@ -134,7 +134,7 @@ function Downloader() {
               <button 
                   onClick={() => triggerDownload(selectedVideoUrl, (data.title || "video") + " HD", "video")} 
                   className="dl-link"
-                  style={{ border: 'none', cursor: 'pointer', backgroundColor: '#e17055', color: 'white', padding: '12px', borderRadius: '10px', fontWeight: 'bold', width: '100%', textAlign: 'center', justifyContent: 'center' }}
+                  style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}
               >
                   Download Video 📥
               </button>
@@ -148,7 +148,7 @@ function Downloader() {
               <button 
                   onClick={() => triggerDownload(data.fullResponse.audioLink, (data.title || "video") + " Audio", "audio")} 
                   className="dl-link"
-                  style={{ border: 'none', cursor: 'pointer', backgroundColor: '#00b894', color: 'white', padding: '12px', borderRadius: '10px', fontWeight: 'bold', width: '100%', textAlign: 'center', justifyContent: 'center' }}
+                  style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}
               >
                   Download Audio 📥
               </button>
@@ -161,7 +161,7 @@ function Downloader() {
               <button 
                   onClick={() => triggerDownload(data.fullResponse.thumbnail, (data.title || "video") + " Thumbnail", "image")} 
                   className="dl-link"
-                  style={{ border: 'none', cursor: 'pointer', backgroundColor: '#6c5ce7', color: 'white', padding: '12px', borderRadius: '10px', fontWeight: 'bold', width: '100%', textAlign: 'center', justifyContent: 'center' }}
+                  style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}
               >
                   Download HQ Image 📥
               </button>
@@ -250,12 +250,12 @@ function Downloader() {
               onClick={() => { setData(null); setUrl(''); }}
               style={{
                 width: '100%', marginTop: '20px', padding: '10px',
-                background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                color: '#cbd5e1', borderRadius: '12px', cursor: 'pointer',
-                fontWeight: 'bold', fontSize: '0.95rem'
+                background: 'transparent', border: '1px solid #262626',
+                color: '#a1a1aa', borderRadius: '8px', cursor: 'pointer',
+                fontSize: '0.9rem'
               }}
-              onMouseOver={(e) => { e.target.style.background = 'rgba(255,255,255,0.1)'; e.target.style.color = '#fff'; }}
-              onMouseOut={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.05)'; e.target.style.color = '#cbd5e1'; }}
+              onMouseOver={(e) => { e.target.style.background = '#171717'; e.target.style.color = '#fff'; }}
+              onMouseOut={(e) => { e.target.style.background = 'transparent'; e.target.style.color = '#a1a1aa'; }}
             >
               ⬅ Go Back & Download Another
             </button>
@@ -281,8 +281,8 @@ function Downloader() {
                 title="Click to download again"
                 style={{
                   display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', 
-                  backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '10px',
-                  cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)'
+                  backgroundColor: 'transparent', borderRadius: '8px',
+                  cursor: 'pointer', border: '1px solid #262626'
                 }}
               >
                 <img src={item.thumbnail} alt="thumb" style={{ width: '80px', height: '45px', objectFit: 'cover', borderRadius: '5px' }} />
